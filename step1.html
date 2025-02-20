@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stephanie 爱心粒子动画</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #text {
+      position: absolute;
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div id="text">Step & Eric</div>
+  <canvas id="heartCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("heartCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 画布大小
+    const CANVAS_WIDTH = window.innerWidth;
+    const CANVAS_HEIGHT = window.innerHeight;
+    const CANVAS_CENTER_X = CANVAS_WIDTH / 2;
+    const CANVAS_CENTER_Y = CANVAS_HEIGHT / 2;
+    const IMAGE_ENLARGE = 15; // 放大比例
+    const PARTICLE_COUNT = 1000; // 粒子数量
+
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+
+    // 随机生成心形区域内的点
+    function randomHeartPoint(shrinkRatio = IMAGE_ENLARGE) {
+      while (true) {
+        const t = Math.random() * 3 * Math.PI; // 0 ~ 2π
+        const r = Math.sqrt(Math.random() * 0.5 + 0.5); // 保持中心区域有粒子
+
+        // 心形公式
+        let x = 17 * Math.pow(Math.sin(t), 3) * r;
+        let y =
+          -(16 * Math.cos(t) -
+            5 * Math.cos(2 * t) -
+            2 * Math.cos(3 * t) -
+            Math.cos(4 * t)) * r;
+
+        // 放大
+        x *= shrinkRatio;
+        y *= shrinkRatio;
+
+        // 平移到中心
+        x += CANVAS_CENTER_X;
+        y += CANVAS_CENTER_Y;
+
+        // 减少中心区域的粒子
+        if (
+          CANVAS_CENTER_X - 50 < x &&
+          x < CANVAS_CENTER_X + 50 &&
+          CANVAS_CENTER_Y - 50 < y &&
+          y < CANVAS_CENTER_Y + 20
+        ) {
+          if (Math.random() > 0.3) {
+            continue;
+          }
+        }
+
+        return { x: Math.floor(x), y: Math.floor(y) };
+      }
+    }
+
+    // 动画帧率控制
+    let lastRenderTime = 0; // 上一次动画帧的时间戳
+    const FRAME_INTERVAL = 200; // 控制帧率，单位为毫秒
+
+    function animate(timestamp) {
+      const timeSinceLastFrame = timestamp - lastRenderTime;
+
+      if (timeSinceLastFrame < FRAME_INTERVAL) {
+        requestAnimationFrame(animate);
+        return; // 如果未到时间间隔，跳过当前帧
+      }
+
+      lastRenderTime = timestamp; // 更新上一次渲染时间戳
+
+      // 绘制动画
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const point = randomHeartPoint();
+        const size = Math.floor(Math.random() * 3) + 2;
+        const colors = ["#FF66B2", "#EEAEEE", "#FF99CC"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, size, 0, 2 * Math.PI);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
